@@ -14,8 +14,8 @@
  * WC requires at least:    2.7
  * WC tested up to:         3.5.3
  *
- * License:                 GPLv3
- * License URI:             http://www.gnu.org/licenses/gpl-3.0.html
+ * License:                 GPLv2 or later
+ * License URI:             http://www.gnu.org/licenses/gpl-2.0.html
  *
  * @package                 WC_Add_To_Cart_Redirection
  */
