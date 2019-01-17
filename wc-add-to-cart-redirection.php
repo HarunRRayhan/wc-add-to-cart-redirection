@@ -24,6 +24,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Permission denied!' );
 }
 
+/**
+ * CONSTANTS
+ */
 // Define AMZ_WC_REDIRECTION_FILE
 if ( ! defined( 'AMZ_WCRD_REDIRECTION_FILE' ) ) {
 	define( 'AMZ_WCRD_REDIRECTION_FILE', __FILE__ );
@@ -44,18 +47,38 @@ if ( ! defined( 'AMZ_WCRD_PLUGIN_VERSION' ) ) {
 	define( 'AMZ_WCRD_PLUGIN_VERSION', '0.1.0' );
 }
 
+
 // Helper Functions
 require_once( dirname( __FILE__ ) . '/helpers/helpers.php' );
 
-// Register Activation Hook
-register_activation_hook( __FILE__, function () {
+
+// Register Activation Hook -- Perform While Activating the plugin
+function amz_wcrd_plugin_activation()
+{
 	// Check if WooCommerce installed or Compatible
 	$notice = amz_wcrd_check_woocommerce_plugin();
 	if ( $notice ) {
 		deactivate_plugins( basename( __FILE__ ) );
 		wp_die( amz_wcrd_plugin_die_message( $notice ) );
 	}
-} );
+
+	// Change WooCommerce default redirection link
+	update_option( 'amz_wcrd_default_redirection', get_option( 'woocommerce_cart_redirect_after_add' ) );
+	update_option( 'woocommerce_cart_redirect_after_add', 'no' );
+}
+
+register_activation_hook( __FILE__, 'amz_wcrd_plugin_activation' );
+
+
+// Register De-activation Hook - Perform while De-Activating the plugin
+function amz_wcrd_plugin_deactivation()
+{
+	update_option( 'woocommerce_cart_redirect_after_add', get_option( 'amz_wcrd_default_redirection' ) );
+	delete_option( 'amz_wcrd_default_redirection' );
+}
+
+register_deactivation_hook( __FILE__, 'amz_wcrd_plugin_deactivation' );
+
 
 // Add Class for Redirection
 if ( ! class_exists( 'AMZ_WooCommerce_Add_To_Cart_Redirection' ) ) {
@@ -64,12 +87,9 @@ if ( ! class_exists( 'AMZ_WooCommerce_Add_To_Cart_Redirection' ) ) {
 
 
 // Add AMZ_WooCommerce_Add_To_Cart_Redirection Class to Loaded hook
-function amz_wcr_instance() {
+function amz_wcr_instance()
+{
 	return AMZ_WooCommerce_Add_To_Cart_Redirection::instance();
 }
+
 add_action( 'plugins_loaded', 'amz_wcr_instance' );
-
-
-
-
-
